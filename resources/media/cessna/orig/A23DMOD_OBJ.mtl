@@ -1,0 +1,49 @@
+# Blender MTL File: 'A23D_14FURNITURE18960.blend'
+# Material Count: 3
+
+newmtl A23DMAT_001
+Ns 251.964629
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.501961 0.501961 0.501961
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Bump A23DMAT_001_Normal.jpg
+map_Kd A23DMAT_001_Albedo.jpg
+map_Ks A23DMAT_001_Specular Level.jpg
+map_Ns A23DMAT_001_Roughness.jpg
+map_d A23DMAT_001_Opacity.jpg
+refl A23DMAT_001_Metallic.jpg
+
+newmtl A23DMAT_002
+Ns 251.964629
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.498039 0.498039 0.498039
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump A23DMAT_002_Normal.jpg
+map_Kd A23DMAT_002_Albedo.jpg
+map_Ks A23DMAT_002_Specular Level.jpg
+map_Ns A23DMAT_002_Roughness.jpg
+map_d A23DMAT_002_Opacity.jpg
+
+newmtl A23DMAT_003
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.098039
+illum 6
+map_Bump A23DMAT_003_Normal.jpg
+map_Kd A23DMAT_003_Albedo.jpg
+map_Ks A23DMAT_003_Specular Level.jpg
+map_Ns A23DMAT_003_Translucency Roughness.jpg
+map_d A23DMAT_003_Translucency.jpg
+refl A23DMAT_003_Metallic.jpg
