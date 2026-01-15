@@ -1,85 +1,46 @@
 #include "raylib-cpp.hpp"
 
-#define RLIGHTS_IMPLEMENTATION
-#include "rlights.h"
+#include "raylib_engine.h"
 
-#if defined(PLATFORM_DESKTOP)
-#define GLSL_VERSION 330
-#else // PLATFORM_ANDROID, PLATFORM_WEB
-#define GLSL_VERSION 100
-#endif
-
+#include <algorithm>
 #include <array>
+#include <cctype>
 #include <iostream>
+#include <string>
 
 int main() {
 
-  // Initialization
-  //--------------------------------------------------------------------------------------
-  const int screenWidth = 1680;
-  const int screenHeight = 1050;
+  auto joystick = Joystick::get_available();
+  if (!joystick) {
+    std::cout << "No RC controller found" << std::endl;
+  }
 
-  SetConfigFlags(FLAG_MSAA_4X_HINT); // Enable Multi Sampling Anti Aliasing 4x
-                                     // (if available)
-  InitWindow(screenWidth, screenHeight,
-             "raylib [shaders] example - basic lighting");
+  RaylibDevice device(1440, 900);
 
-  raylib::Camera3D camera(raylib::Vector3(2, 4, 6),
-                          raylib::Vector3(0, 0.5, 0.));
-  camera.fovy = 45.;
-  camera.projection = CAMERA_PERSPECTIVE;
-
-  // Load basic lighting shader
-  raylib::Shader shader(
-      TextFormat("resources/shaders/glsl%i/lighting.vs", GLSL_VERSION),
-      TextFormat("resources/shaders/glsl%i/lighting.fs", GLSL_VERSION));
-  // Get some required shader locations
-  shader.locs[SHADER_LOC_VECTOR_VIEW] = shader.GetLocation("viewPos");
   // NOTE: "matModel" location name is automatically assigned on shader loading,
   // no need to get the location again if using that uniform name
   // shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader,
   // "matModel");
 
-  // Ambient light level (some basic lighting)
-  int ambientLoc = shader.GetLocation("ambient");
-  std::array<float, 4> ambientValues = {0.1f, 0.1f, 0.1f, 1.0f};
-  shader.SetValue(ambientLoc, ambientValues.data(), SHADER_UNIFORM_VEC4);
-
   // Create lights
   std::array<Light, MAX_LIGHTS> lights = {
-      CreateLight(LIGHT_POINT, (Vector3){-2, 1, -2}, Vector3Zero(), YELLOW,
-                  shader),
-      CreateLight(LIGHT_POINT, (Vector3){2, 1, 2}, Vector3Zero(), RED, shader),
-      CreateLight(LIGHT_POINT, (Vector3){-2, 1, 2}, Vector3Zero(), GREEN,
-                  shader),
-      CreateLight(LIGHT_POINT, (Vector3){2, 1, -2}, Vector3Zero(), BLUE,
-                  shader),
+      device.create_light(LIGHT_POINT, (Vector3){-2, 1, -2}, Vector3Zero(),
+                          YELLOW),
+      device.create_light(LIGHT_POINT, (Vector3){2, 1, 2}, Vector3Zero(), RED),
+      device.create_light(LIGHT_POINT, (Vector3){-2, 1, 2}, Vector3Zero(),
+                          GREEN),
+      device.create_light(LIGHT_POINT, (Vector3){2, 1, -2}, Vector3Zero(),
+                          BLUE),
   };
 
   //------------------------------------------------------------------------------
   // Load airplane models
-  raylib::Model model("resources/media/cessna/CessnaBodyFixed2.obj");
-  for (int i = 0; i < model.GetMaterialCount(); i++) {
-    model.GetMaterials()[i].shader = shader;
-  }
-
-  SetTargetFPS(60); // Set our game to run at 60 frames-per-second
-  //--------------------------------------------------------------------------------------
+  raylib::Model model =
+      device.load_model("resources/media/cessna/CessnaBodyFixed2.obj");
 
   // Main game loop
   while (!WindowShouldClose()) // Detect window close button or ESC key
   {
-    // Update
-    //----------------------------------------------------------------------------------
-    camera.Update(CAMERA_ORBITAL);
-
-    // Update the shader with the camera view vector (points towards { 0.0f,
-    // 0.0f, 0.0f })
-    std::array<float, 3> cameraPos = {camera.position.x, camera.position.y,
-                                      camera.position.z};
-    shader.SetValue(shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos.data(),
-                    SHADER_UNIFORM_VEC3);
-
     // Check key inputs to enable/disable lights
     if (IsKeyPressed(KEY_Y)) {
       lights[0].enabled = !lights[0].enabled;
@@ -94,25 +55,9 @@ int main() {
       lights[3].enabled = !lights[3].enabled;
     }
 
-    // Update light values (actually, only enable/disable them)
-    for (const auto &light : lights)
-      UpdateLightValues(shader, light);
-    //----------------------------------------------------------------------------------
-
-    // Draw
-    //----------------------------------------------------------------------------------
-    BeginDrawing();
-
-    ClearBackground(RAYWHITE);
-
-    BeginMode3D(camera);
-
-    shader.BeginMode();
-
+    device.begin_frame();
     DrawPlane(Vector3Zero(), (Vector2){10.0, 10.0}, WHITE);
     model.Draw(Vector3{0.0f, 1.0f, 0.0f}, 1.0f, WHITE);
-
-    shader.EndMode();
 
     // Draw spheres to show where the lights are
     for (const auto &light : lights) {
@@ -125,22 +70,8 @@ int main() {
 
     DrawGrid(10, 1.0f);
 
-    EndMode3D();
-
-    DrawFPS(10, 10);
-
-    DrawText("Use keys [Y][R][G][B] to toggle lights", 10, 40, 20, DARKGRAY);
-
-    EndDrawing();
-    //----------------------------------------------------------------------------------
+    device.end_frame();
   }
-
-  // De-Initialization
-  //--------------------------------------------------------------------------------------
-  shader.Unload(); // Unload shader
-  model.Unload();  // Unload model
-  CloseWindow();   // Close window and OpenGL context
-  //--------------------------------------------------------------------------------------
 
   return 0;
 }

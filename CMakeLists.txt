@@ -26,7 +26,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(raylib_cpp)
 
 # 6. Define your executable
-add_executable(${PROJECT_NAME} src/main.cc)
+add_executable(${PROJECT_NAME} src/main.cc src/raylib_engine.cc src/rlights.cc)
 
 # 7. Link against raylib
 # On Linux, you also need to link standard system math/threading libs
