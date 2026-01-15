@@ -24,9 +24,8 @@ run_linux: build-linux/${PROJECT_NAME}
 .PHONY:
 run_web: build-web/${PROJECT_NAME}.html
 	make -C build-web
-	pkill python3
-	python3 -m http.server &
 	google-chrome http://0.0.0.0:8000/build-web/${PROJECT_NAME}.html
+	python3 -m http.server
 
 .PHONY:
 clean:
