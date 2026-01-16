@@ -33,6 +33,15 @@ int main() {
                           BLUE),
   };
 
+  device.add_skybox_from_6_images(
+    "resources/media/skybox/px.png",
+    "resources/media/skybox/nx.png",
+    "resources/media/skybox/py.png",
+    "resources/media/skybox/ny.png",
+    "resources/media/skybox/pz.png",
+    "resources/media/skybox/nz.png"
+  );
+
   //------------------------------------------------------------------------------
   // Load airplane models
   raylib::Model model =

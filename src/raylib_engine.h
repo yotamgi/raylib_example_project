@@ -29,13 +29,22 @@ public:
                            bool enable_lighting = true);
   Light &create_light(int type, raylib::Vector3 position,
                       raylib::Vector3 target, raylib::Color color);
+
+  void add_skybox_from_single_image(std::string image_path);
+  void add_skybox_from_6_images(std::string right, std::string left,
+                                std::string top, std::string bottom,
+                                std::string back, std::string front);
+
   void begin_frame();
   void end_frame();
 
 private:
+  void add_skybox_from_image(const raylib::Image &image);
+
   raylib::Camera3D m_camera;
   raylib::Shader m_lighting_shader;
   std::vector<Light> m_lights;
+  std::optional<raylib::Model> m_skybox_model;
 };
 
 #endif // __RAYLIB_ENGINE_H__

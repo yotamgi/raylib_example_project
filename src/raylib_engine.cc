@@ -65,6 +65,61 @@ raylib::Model RaylibDevice::load_model(const std::string &file_name,
   return model;
 }
 
+void RaylibDevice::add_skybox_from_single_image(std::string image_path) {
+  Image img = LoadImage(image_path.c_str());
+  add_skybox_from_image(img);
+}
+
+void RaylibDevice::add_skybox_from_6_images(std::string right, std::string left,
+                                            std::string top, std::string bottom,
+                                            std::string back,
+                                            std::string front) {
+  std::array<raylib::Image, 6> faces = {
+      LoadImage(right.c_str()), LoadImage(left.c_str()),
+      LoadImage(top.c_str()),   LoadImage(bottom.c_str()),
+      LoadImage(back.c_str()),  LoadImage(front.c_str()),
+  };
+  int size = faces[0].width; // Assuming square images of the same size
+
+  Image atlas = GenImageColor(size, size * 6, BLANK);
+
+  for (int i = 0; i < 6; i++) {
+    Rectangle src = {0, 0, (float)size, (float)size};
+    Rectangle dst = {0, (float)i * size, (float)size, (float)size};
+    ImageDraw(&atlas, faces[i], src, dst, WHITE);
+  }
+  add_skybox_from_image(atlas);
+}
+
+void RaylibDevice::add_skybox_from_image(const raylib::Image &image) {
+  // Load skybox model
+  Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
+  m_skybox_model = LoadModelFromMesh(cube);
+
+  // Load skybox shader and set required locations
+  // NOTE: Some locations are automatically set at shader loading
+  m_skybox_model->materials[0].shader = LoadShader(
+      TextFormat("resources/shaders/glsl%i/skybox.vs", GLSL_VERSION),
+      TextFormat("resources/shaders/glsl%i/skybox.fs", GLSL_VERSION));
+
+  SetShaderValue(
+      m_skybox_model->materials[0].shader,
+      GetShaderLocation(m_skybox_model->materials[0].shader, "environmentMap"),
+      (int[1]){MATERIAL_MAP_CUBEMAP}, SHADER_UNIFORM_INT);
+  SetShaderValue(
+      m_skybox_model->materials[0].shader,
+      GetShaderLocation(m_skybox_model->materials[0].shader, "doGamma"),
+      (int[1]){0}, SHADER_UNIFORM_INT);
+  SetShaderValue(
+      m_skybox_model->materials[0].shader,
+      GetShaderLocation(m_skybox_model->materials[0].shader, "vflipped"),
+      (int[1]){0}, SHADER_UNIFORM_INT);
+
+  m_skybox_model->materials[0].maps[MATERIAL_MAP_CUBEMAP].texture =
+      LoadTextureCubemap(image,
+                         CUBEMAP_LAYOUT_AUTO_DETECT); // CUBEMAP_LAYOUT_PANORAMA
+}
+
 void RaylibDevice::begin_frame() {
   m_camera.Update(CAMERA_CUSTOM);
 
@@ -84,6 +139,15 @@ void RaylibDevice::begin_frame() {
   ClearBackground(RAYWHITE);
 
   BeginMode3D(m_camera);
+
+  if (m_skybox_model.has_value()) {
+    // We are inside the cube, we need to disable backface culling!
+    rlDisableBackfaceCulling();
+    rlDisableDepthMask();
+    DrawModel(*m_skybox_model, (Vector3){0, 0, 0}, 1.0f, WHITE);
+    rlEnableBackfaceCulling();
+    rlEnableDepthMask();
+  }
   m_lighting_shader.BeginMode();
 }
 
