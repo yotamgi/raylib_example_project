@@ -10,12 +10,12 @@
 
 int main() {
 
-  auto joystick = Joystick::get_available();
+  auto joystick = engine::Joystick::get_available();
   if (!joystick) {
     std::cout << "No RC controller found" << std::endl;
   }
 
-  RaylibDevice device(1440, 900);
+  engine::RaylibDevice device(1440, 900);
 
   // NOTE: "matModel" location name is automatically assigned on shader loading,
   // no need to get the location again if using that uniform name

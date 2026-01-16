@@ -7,6 +7,8 @@
 #include <optional>
 #include <vector>
 
+namespace engine {
+
 class Joystick {
 public:
   static std::optional<Joystick> get_available();
@@ -46,5 +48,7 @@ private:
   std::vector<Light> m_lights;
   std::optional<raylib::Model> m_skybox_model;
 };
+
+} // namespace engine
 
 #endif // __RAYLIB_ENGINE_H__
